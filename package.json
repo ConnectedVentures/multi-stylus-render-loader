@@ -1,0 +1,21 @@
+{
+  "name": "multi-stylus-render-loader",
+  "version": "0.2.0",
+  "author": "Xanderite",
+  "description": "compiles stylus using multiple definitions of define variables, and name spaces them",
+  "devDependencies": {
+    "css-loader": "~0.8.0",
+    "stylus": "^0.54.5"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git@github.com:webpack/style-loader.git"
+  },
+  "license": "MIT",
+  "dependencies": {
+    "promise": "^7.1.1",
+    "loader-utils": "^0.2.7",
+    "lodash.clonedeep": "^4.3.2",
+    "lodash.isarray": "^4.0.0"
+  }
+}
