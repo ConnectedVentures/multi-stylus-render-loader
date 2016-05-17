@@ -15,17 +15,19 @@ var newLineRegexp = /(?:\\r)?\\n/g
 module.exports = function(source) {
   var self = this;
   if (self.cacheable) self.cacheable();
-  var configs = cloneDeep(loaderUtils.getLoaderConfig(self, "multiStylusLoader")).configs;
+  var configPaths = cloneDeep(loaderUtils.getLoaderConfig(self, "multiStylusLoader")).paths;
   var context = self.context
   var done = self.async()
 
-  mutliRender(source, configs)
-    .then(function (results) {
-      var output = results
-      done(null, output);
-    }).catch(function (err) {
-      done(err)
-    })
+  getConfigs(configPaths).then(function(configs) {
+    return mutliRender(source, configs)
+  }).then(function (results) {
+    var output = results
+    done(null, output);
+  }).catch(function (err) {
+    done(err)
+  })
+
 
   function mutliRender (source, configs) {
     return Promise.all(
@@ -42,6 +44,31 @@ module.exports = function(source) {
       })
     ).then(function(results) {
       return results.join('\n\n')
+    })
+  }
+
+  function getConfigs (configPaths) {
+    return Promise.all(
+      Object.keys(configPaths).map(function(configName) {
+        var configPath = configPaths[configName]
+        // Asynchronously load import
+        var configFileName
+        return resolvePromise(context, configPath)
+          .then(function(fileName) {
+            console.log('load module config fileName', fileName)
+            self.addDependency && self.addDependency(fileName);
+            configFileName = fileName
+            return loadModulePromise(fileName)
+          }).then(function (results) {
+            results = self.exec(results, configFileName)
+            configPaths[configName] = results
+          }).catch(function(err) {
+            console.log('load module promise err', err)
+          })
+      })
+    ).then(function () {
+      console.log('configs:\n', configPaths)
+      return configPaths
     })
   }
 
