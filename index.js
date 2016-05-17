@@ -58,7 +58,7 @@ module.exports = function(source) {
             console.log('load module config fileName', fileName)
             self.addDependency && self.addDependency(fileName);
             configFileName = fileName
-            return loadModulePromise(fileName)
+            return loadModulePromise('-!' + __dirname + '/identity.loader.js!' + fileName)
           }).then(function (results) {
             results = self.exec(results, configFileName)
             configPaths[configName] = results
