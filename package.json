@@ -9,7 +9,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git@github.com:webpack/style-loader.git"
+    "url": "git@github.com:ConnectedVentures/multi-stylus-render-loader"
   },
   "license": "MIT",
   "dependencies": {

@@ -1,81 +1,52 @@
-# style loader for webpack
+# Multi Stylus Render Loader for Webpack
+
+This loader takes a stylus file, renders it as many times as is specified each with different stylus options. The rendered css is namespace with a user defined value and returns a value ready to be used by the css-loader.   
+  
+This results in namespaced css rules that supports style-loader hot module replacement in dev-mode, and also text-extractor for production bundling. 
+  
+If you wish webpack to cache and watch the stylus files stylus dependencies, use stylus-flatten-loader, which bundles these, although lacks source map support.
 
 ## Usage
 
 [Documentation: Using loaders](http://webpack.github.io/docs/using-loaders.html)
 
-### Simple API
+Add the `multiStylusLoader` option to your Webpack config.
 
-``` javascript
-require("style!raw!./file.css");
-// => add rules in file.css to document
+Add to your Webpack `loaders` config under the `/\.(styl|stylus)$/` test
+
+#### Recommended loader config
 ```
-
-It's recommended to combine it with the [`css-loader`](https://github.com/webpack/css-loader): `require("style!css!./file.css")`.
-
-It's also possible to add a URL instead of a CSS string:
-
-``` javascript
-require("style/url!file!./file.css");
-// => add a <link rel="stylesheet"> to file.css to document
-```
-
-### Local scope CSS
-
-(experimental)
-
-When using [local scope CSS](https://github.com/webpack/css-loader#local-scope) the module exports the generated identifiers:
-
-``` javascript
-var style = require("style!css!./file.css");
-style.placeholder1 === "z849f98ca812bc0d099a43e0f90184"
-```
-
-### Reference-counted API
-
-``` javascript
-var style = require("style/useable!css!./file.css");
-style.use(); // = style.ref();
-style.unuse(); // = style.unref();
-```
-
-Styles are not added on `require`, but instead on call to `use`/`ref`. Styles are removed from page if `unuse`/`unref` is called exactly as often as `use`/`ref`.
-
-Note: Behavior is undefined when `unuse`/`unref` is called more often than `use`/`ref`. Don't do that.
-
-### Options
-
-#### `insertAt`
-
-By default, the style-loader appends `<style>` elements to the end of the `<head>` tag of the page. This will cause CSS created by the loader to take priority over CSS already present in the document head. To insert style elements at the beginning of the head, set this query parameter to 'top', e.g. `require('../style.css?insertAt=top')`.
-
-#### `singleton`
-
-If defined, the style-loader will re-use a single `<style>` element, instead of adding/removing individual elements for each required module. **Note:** this option is on by default in IE9, which has strict limitations on the number of style tags allowed on a page. You can enable or disable it with the singleton query parameter (`?singleton` or `?-singleton`).
-
-## Recommended configuration
-
-By convention the reference-counted API should be bound to `.useable.css` and the simple API to `.css` (similar to other file types, i.e. `.useable.less` and `.less`).
-
-So the recommended configuration for webpack is:
-
-``` javascript
-{
-  module: {
-    loaders: [
-      { test: /\.css$/, exclude: /\.useable\.css$/, loader: "style!css" },
-      { test: /\.useable\.css$/, loader: "style/useable!css" }
-    ]
-  }
+{ test: /\.(styl|stylus)(\?.*)?$/,
+  loader: 'style-loader!css-loader!multi-stylus-render!stylus-flatten'
 }
 ```
 
-**Note** about source maps support and assets referenced with `url`: when style loader is used with ?sourceMap option, the CSS modules will be generated as `Blob`s, so relative paths don't work (they would be relative to `chrome:blob` or `chrome:devtools`). In order for assets to maintain correct paths setting `output.publicPath` property of webpack configuration must be set, so that absolute paths are generated.
+#### CONFIG API
+Config option `multiStylusLoader` in your Webpack config.
 
-## Install
+* **`paths`** property should be a dictionary
+	* Maps a namespace to a, relative to the cwd, js module path. The module should export a stylus options object.
+	* There can be as many path entries as required.
+
+E.g. 
 
 ```
-npm install style-loader
+  multiStylusLoader: {
+    paths:
+    { 'stylusConfigOne': 'src/providers/stylusConfigOne.js'
+    }
+  }
+```
+
+## Install
+in project `package.json` add this devDependency 
+not hosted on npm, as I doubt anyone will want to use this
+
+```json
+"devDependencies": {
+  "multi-stylus-render-loader": "git+http://github.com/ConnectedVentures/multi-stylus-render-loader.git"
+'
+}
 ```
 
 ## License
