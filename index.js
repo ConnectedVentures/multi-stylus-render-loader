@@ -1,21 +1,21 @@
-var path = require('path');
-var fs = require('fs');
+var path = require('path')
+var fs = require('fs')
 
-var loaderUtils = require('loader-utils');
-var Promise = require('promise');
-var stylus = require('stylus');
-var cloneDeep = require('lodash.clonedeep');
-var isArray = require('lodash.isarray');
+var loaderUtils = require('loader-utils')
+var Promise = require('promise')
+var stylus = require('stylus')
+var cloneDeep = require('lodash.clonedeep')
+var isArray = require('lodash.isarray')
 
-var importRegexp = /(.*)@(import|require)\s*["'](.*)["']\s*$/;
+var importRegexp = /(.*)@(import|require)\s*["'](.*)["']\s*$/
 var trailingSlashesRegexp = /\/$/
 var leadingWhitespaceRegexp = /^([\t ]*)/
 var newLineRegexp = /(?:\\r)?\\n/g
 
 module.exports = function(source) {
-  var self = this;
-  if (self.cacheable) self.cacheable();
-  var configPaths = cloneDeep(loaderUtils.getLoaderConfig(self, "multiStylusLoader")).paths;
+  var self = this
+  if (self.cacheable) self.cacheable()
+  var configPaths = cloneDeep(loaderUtils.getLoaderConfig(self, "multiStylusLoader")).paths
   var context = self.context
   var done = self.async()
 
@@ -23,11 +23,10 @@ module.exports = function(source) {
     return mutliRender(source, configs)
   }).then(function (results) {
     var output = results
-    done(null, output);
+    done(null, output)
   }).catch(function (err) {
     done(err)
   })
-
 
   function mutliRender (source, configs) {
     return Promise.all(
@@ -55,8 +54,7 @@ module.exports = function(source) {
         var configFileName
         return resolvePromise(context, configPath)
           .then(function(fileName) {
-            console.log('load module config fileName', fileName)
-            self.addDependency && self.addDependency(fileName);
+            self.addDependency && self.addDependency(fileName)
             configFileName = fileName
             return loadModulePromise('-!' + __dirname + '/identity.loader.js!' + fileName)
           }).then(function (results) {
@@ -67,7 +65,6 @@ module.exports = function(source) {
           })
       })
     ).then(function () {
-      console.log('configs:\n', configPaths)
       return configPaths
     })
   }
@@ -79,7 +76,7 @@ module.exports = function(source) {
       compiler.render(function(err, css) {
         if (err) reject(err)
         resolve(css)
-      });
+      })
     })
   }
 
@@ -88,8 +85,8 @@ module.exports = function(source) {
       self.resolve(context, request, function(err, filename) {
         if (err) reject(err)
         resolve(filename)
-      });
-    });
+      })
+    })
   }
 
   function loadModulePromise(request) {
@@ -97,31 +94,31 @@ module.exports = function(source) {
       self.loadModule(request, function(err, source) {
         if (err) reject(err)
         resolve(source)
-      });
-    });
+      })
+    })
   }
-};
+}
 
 function applyOptions(stylus, options) {
   ['set', 'include', 'import', 'define', 'use'].forEach(function(method) {
-    var option = options[method];
+    var option = options[method]
     if (isArray(option)) {
       for (var i = 0; i < option.length; i++)
-        stylus[method](option[i]);
+        stylus[method](option[i])
     } else {
       for (var prop in option)
-        stylus[method](prop, option[prop]);
+        stylus[method](prop, option[prop])
     }
-  });
+  })
 }
 
 function indentSource (source, indentSize) {
   var lines = source.split(newLineRegexp)
   var indent = Array(indentSize + 1).join(' ')
   return lines.map(function (line, index) {
-    return indent + normalizeWhiteSpace(line);
+    return indent + normalizeWhiteSpace(line)
   }).join('\n')
-};
+}
 
 function normalizeWhiteSpace(line) {
   return line.replace(/\\t/g, '  ')
