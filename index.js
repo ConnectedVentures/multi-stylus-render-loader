@@ -97,19 +97,23 @@ module.exports = function(source) {
       })
     })
   }
-}
 
-function applyOptions(stylus, options) {
-  ['set', 'include', 'import', 'define', 'use'].forEach(function(method) {
-    var option = options[method]
-    if (isArray(option)) {
-      for (var i = 0; i < option.length; i++)
-        stylus[method](option[i])
-    } else {
-      for (var prop in option)
-        stylus[method](prop, option[prop])
-    }
-  })
+  function applyOptions(stylus, options) {
+    ['set', 'include', 'import', 'define', 'use'].forEach(function(method) {
+      var option = options[method]
+      if (isArray(option)) {
+        for (var i = 0; i < option.length; i++) {
+          stylus[method](option[i])
+          if ('include' === method) {
+            self.addContextDependency(option[i])
+          }
+        }
+      } else {
+        for (var prop in option)
+          stylus[method](prop, option[prop])
+      }
+    })
+  }
 }
 
 function indentSource (source, indentSize) {
